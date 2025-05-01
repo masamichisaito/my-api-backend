@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      db:
+      postgres:
         image: postgres:15
         env:
           POSTGRES_USER: testuser
@@ -27,35 +27,35 @@ jobs:
       DB_USERNAME: testuser
       DB_PASSWORD: testpass
       DB_NAME: myapp_test
-      DB_HOST: db
+      DB_HOST: postgres
       DB_PORT: 5432
       PORT: 3000
 
     steps:
-      - name: ✅ Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: ✅ Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: ✅ Install dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: ⏳ Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL to be ready
         run: |
           for i in {1..30}; do
-            pg_isready -h db -p 5432 -U testuser && echo "✅ DB is ready" && exit 0
-            echo "⏳ Waiting for db ($i)..." && sleep 2
+            pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME && echo "✅ DB is ready" && exit 0
+            echo "⏳ Waiting for DB ($i)..." && sleep 2
           done
           echo "❌ DB not ready in time" && exit 1
 
-      - name: 🐞 Debug: List all containers
+      - name: Debug: List all containers
         if: failure()
         run: docker ps -a
 
-      - name: 🐞 Debug: Show logs for DB container
+      - name: Debug: Show logs for PostgreSQL
         if: failure()
         run: |
           CONTAINER_ID=$(docker ps -a --filter "ancestor=postgres:15" --format "{{.ID}}" | head -n 1)
@@ -66,8 +66,8 @@ jobs:
             echo "❌ PostgreSQL container not found"
           fi
 
-      - name: 🛠 Run DB migration
+      - name: Run DB migration
         run: npx sequelize-cli db:migrate --env test
 
-      - name: ✅ Run tests
+      - name: Run tests
         run: npm test
