@@ -32,18 +32,18 @@ jobs:
       PORT: 3000
 
     steps:
-      - name: Checkout code
+      - name: ✅ Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: ✅ Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: ✅ Install dependencies
         run: npm ci
 
-      - name: Wait for DB to be ready
+      - name: ⏳ Wait for PostgreSQL to be ready
         run: |
           for i in {1..30}; do
             pg_isready -h db -p 5432 -U testuser && echo "✅ DB is ready" && exit 0
@@ -51,12 +51,23 @@ jobs:
           done
           echo "❌ DB not ready in time" && exit 1
 
-      - name: Show Docker logs for DB (if failed)
+      - name: 🐞 Debug: List all containers
         if: failure()
-        run: docker logs $(docker ps -a --filter "name=db" --format "{{.ID}}") || echo "No db container found"
+        run: docker ps -a
 
-      - name: Run DB migration
+      - name: 🐞 Debug: Show logs for DB container
+        if: failure()
+        run: |
+          CONTAINER_ID=$(docker ps -a --filter "ancestor=postgres:15" --format "{{.ID}}" | head -n 1)
+          if [ -n "$CONTAINER_ID" ]; then
+            echo "✅ Found PostgreSQL container: $CONTAINER_ID"
+            docker logs "$CONTAINER_ID"
+          else
+            echo "❌ PostgreSQL container not found"
+          fi
+
+      - name: 🛠 Run DB migration
         run: npx sequelize-cli db:migrate --env test
 
-      - name: Run tests
+      - name: ✅ Run tests
         run: npm test
