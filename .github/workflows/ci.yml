@@ -1,4 +1,4 @@
-name: CI (Backend)
+name: CI
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
     branches: [main, develop]
 
 jobs:
-  backend-ci:
+  test:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
+      db:
         image: postgres:15
         env:
           POSTGRES_USER: testuser
@@ -20,7 +20,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready"
+          --health-cmd="pg_isready -U testuser"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -29,7 +29,7 @@ jobs:
       DB_USERNAME: testuser
       DB_PASSWORD: testpass
       DB_NAME: myapp_test
-      DB_HOST: postgres
+      DB_HOST: db              # 🔥 サービス名と一致させる（postgresではない）
       DB_PORT: 5432
       PORT: 3000
 
@@ -37,21 +37,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Wait for PostgreSQL to be ready
+      - name: Wait for DB to be ready
         run: |
-          apt-get update && apt-get install -y netcat
           for i in {1..30}; do
-            nc -z postgres 5432 && echo "✅ PostgreSQL is up!" && break
-            echo "⏳ Waiting for PostgreSQL..." && sleep 1
+            pg_isready -h db -p 5432 -U testuser && echo "✅ DB is ready" && exit 0
+            echo "⏳ Waiting for db..." && sleep 2
           done
+          echo "❌ DB not ready in time" && exit 1
 
       - name: Run DB migration
         run: npx sequelize-cli db:migrate --env test
