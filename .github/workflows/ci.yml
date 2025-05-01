@@ -53,19 +53,19 @@ jobs:
 
       - name: Debug: List all containers
         if: failure()
-        run: docker ps -a
-  
+        run: |
+          docker ps -a
+
       - name: Debug: Show logs for PostgreSQL
         if: failure()
         run: |
           CONTAINER_ID=$(docker ps -a --filter "ancestor=postgres:15" --format "{{.ID}}" | head -n 1)
           if [ -n "$CONTAINER_ID" ]; then
-          echo "✅ Found PostgreSQL container: $CONTAINER_ID"
-          docker logs "$CONTAINER_ID"
+            echo "✅ Found PostgreSQL container: $CONTAINER_ID"
+            docker logs "$CONTAINER_ID"
           else
-          echo "❌ PostgreSQL container not found"
+            echo "❌ PostgreSQL container not found"
           fi
-  
 
       - name: Run DB migration
         run: npx sequelize-cli db:migrate --env test
