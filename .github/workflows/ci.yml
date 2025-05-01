@@ -9,6 +9,7 @@ on:
 jobs:
   backend-ci:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:15
@@ -24,6 +25,14 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    env:
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      DB_NAME: myapp_test
+      DB_HOST: postgres
+      DB_PORT: 5432
+      PORT: 3000
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -36,15 +45,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Prepare test env
-        run: |
-          echo "DB_USERNAME=user" >> .env.test
-          echo "DB_PASSWORD=password" >> .env.test
-          echo "DB_NAME=myapp_test" >> .env.test
-          echo "DB_HOST=postgres" >> .env.test
-          echo "DB_PORT=5432" >> .env.test
-          echo "PORT=3000" >> .env.test
-
       - name: Wait for PostgreSQL to be ready
         run: |
           apt-get update && apt-get install -y netcat
@@ -54,7 +54,7 @@ jobs:
           done
 
       - name: Run DB migration
-        run: npx dotenv -e .env.test -- npx sequelize-cli db:migrate --env test
+        run: npx sequelize-cli db:migrate --env test
 
       - name: Run tests
         run: npm test
