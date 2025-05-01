@@ -1,5 +1,8 @@
 require('dotenv').config({ path: '.env.test' });
 
+console.log('DB_USERNAME:', process.env.DB_USERNAME);
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+
 module.exports = {
   development: {
     username: 'postgres',
