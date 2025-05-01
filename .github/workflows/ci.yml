@@ -14,8 +14,8 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
           POSTGRES_DB: myapp_test
         ports:
           - 5432:5432
@@ -26,8 +26,8 @@ jobs:
           --health-retries=5
 
     env:
-      DB_USERNAME: user
-      DB_PASSWORD: password
+      DB_USERNAME: testuser
+      DB_PASSWORD: testpass
       DB_NAME: myapp_test
       DB_HOST: postgres
       DB_PORT: 5432

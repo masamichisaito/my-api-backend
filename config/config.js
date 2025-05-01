@@ -1,26 +1,34 @@
-require('dotenv').config({ path: '.env.test' });
-
-console.log('DB_USERNAME:', process.env.DB_USERNAME);
-console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+require('dotenv').config();
 
 module.exports = {
   development: {
-    username: 'postgres',
-    password: 'your_password',
-    database: 'your_database',
-    host: '127.0.0.1',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
   },
   test: {
-    username: process.env.DB_USERNAME || 'user',
-    password: process.env.DB_PASSWORD || null,
-    database: process.env.DB_NAME || 'myapp_test',
-    host: process.env.DB_HOST || 'localhost',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
   },
   production: {
-    use_env_variable: 'DATABASE_URL',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 6543,
     dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   },
 };
