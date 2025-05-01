@@ -46,29 +46,4 @@ jobs:
       - name: Wait for PostgreSQL to be ready
         run: |
           for i in {1..30}; do
-            pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME && echo "✅ DB is ready" && exit 0
-            echo "⏳ Waiting for DB ($i)..." && sleep 2
-          done
-          echo "❌ DB not ready in time" && exit 1
-
-      - name: Debug: List all containers
-        if: failure()
-        run: |
-          docker ps -a
-
-      - name: Debug: Show logs for PostgreSQL
-        if: failure()
-        run: |
-          CONTAINER_ID=$(docker ps -a --filter "ancestor=postgres:15" --format "{{.ID}}" | head -n 1)
-          if [ -n "$CONTAINER_ID" ]; then
-            echo "✅ Found PostgreSQL container: $CONTAINER_ID"
-            docker logs "$CONTAINER_ID"
-          else
-            echo "❌ PostgreSQL container not found"
-          fi
-
-      - name: Run DB migration
-        run: npx sequelize-cli db:migrate --env test
-
-      - name: Run tests
-        run: npm test
+            pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME && echo "✅ DB is ready
