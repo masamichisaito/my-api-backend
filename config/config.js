@@ -1,23 +1,34 @@
-require('dotenv').config(); // .env ファイルの読み込み
+require('dotenv').config();
 
 module.exports = {
   development: {
-    username: 'postgres',
-    password: 'your_password',
-    database: 'your_database',
-    host: '127.0.0.1',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
   },
   test: {
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || null,
-    database: process.env.DB_NAME_TEST || 'my_api_test',
-    host: process.env.DB_HOST || '127.0.0.1',
-    dialect: 'postgres',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
     port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
   },
   production: {
-    use_env_variable: 'DATABASE_URL',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 6543,
     dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   },
 };
