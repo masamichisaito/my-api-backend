@@ -1,20 +1,30 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
-require('dotenv').config();
-const userRoutes = require('./routes/users');
-const { User } = require('./models'); // Userモデルのインポート
+
+const allowedOrigins = {
+  development: 'http://localhost:5173',
+  production: 'https://your-app.onrender.com',
+  test: 'http://localhost:4173',
+};
+
+const currentEnv = process.env.NODE_ENV || 'development';
+
+app.use(cors({
+  origin: allowedOrigins[currentEnv],
+  credentials: true
+}));
 
 app.use(express.json());
+
+const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
 
 app.get('/users', async (req, res) => {
-  try {
-    const users = await User.findAll();
-    res.status(200).json(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+  const users = await User.findAll();
+  res.status(200).json(users);
 });
 
 module.exports = app;
+
+
