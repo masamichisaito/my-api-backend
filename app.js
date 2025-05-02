@@ -1,30 +1,31 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+require('dotenv').config(); // ← .env を読み込む
 
-const allowedOrigins = {
-  development: 'http://localhost:5173',
-  production: 'https://your-app.onrender.com',
-  test: 'http://localhost:4173',
-};
+const { User } = require('./models'); // User モデルを忘れずにインポート
 
-const currentEnv = process.env.NODE_ENV || 'development';
-
+// Docker環境でも通す簡易版CORS設定（必要に応じて厳密化）
 app.use(cors({
-  origin: allowedOrigins[currentEnv],
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 
 app.use(express.json());
 
+// ユーザーAPIルーティング
 const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
 
+// ユーザー一覧取得
 app.get('/users', async (req, res) => {
-  const users = await User.findAll();
-  res.status(200).json(users);
+  try {
+    const users = await User.findAll();
+    res.status(200).json(users);
+  } catch (err) {
+    console.error('一覧取得エラー:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 module.exports = app;
-
-
