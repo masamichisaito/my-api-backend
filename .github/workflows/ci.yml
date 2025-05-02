@@ -50,3 +50,13 @@ jobs:
             echo "⏳ Waiting for DB ($i)..." && sleep 2
           done
           echo "❌ DB not ready in time" && exit 1
+
+      - name: Show final pg_isready result
+        run: |
+          pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME || true
+
+      - name: Run DB migration
+        run: npx sequelize-cli db:migrate --env test
+
+      - name: Run tests
+        run: npm test
