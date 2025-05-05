@@ -10,10 +10,12 @@ const corsOptions = {
   credentials: true
 };
 
+// 全ルートに対してCORS適用
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));  // ← これが重要！
-
 app.use(express.json());
+
+// 明示的に OPTIONS に対応させる（この書き方が安全）
+app.options('/users', cors(corsOptions));
 
 const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
