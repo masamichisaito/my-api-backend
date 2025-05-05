@@ -14,11 +14,15 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const { email, name, age, hobby } = req.body;
+  console.log('[📩 POST受信]', req.body); // ← 追加！
 
   try {
     const user = await User.create({ email, name, age, hobby });
+    console.log('[✅ 登録成功]', user); // ← 追加！
     res.status(201).json(user);
   } catch (err) {
+    console.error('[❌ 登録エラー]', err); // ← 追加！
+
     if (err.name === 'SequelizeValidationError') {
       const messages = err.errors.map(e => {
         if (e.path === 'email' && e.type === 'notNull Violation') {
@@ -35,15 +39,15 @@ router.post('/', async (req, res) => {
         }
         return e.message;
       });
-      return res.status(400).json({ errors: messages });
+      return res.status(400).json({ errors: messages }); // ← これが必須
     }
-
+    
     if (err.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ error: 'email はすでに登録されています' });
     }
-
-    console.error(err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    
+    return res.status(500).json({ error: 'Internal Server Error' });
+    
   }
 });
 
