@@ -103,4 +103,28 @@ describe('User API ユニットテスト', () => {
       expect(res.body.isAdmin).toBeUndefined(); // ← モデルに存在しないため
     });
   });
+
+  describe('DELETE /users/:id', () => {
+    it('指定したIDのユーザーを削除できる', async () => {
+      const newUser = await User.create({
+        email: 'test@example.com',
+        name: '削除テスト',
+        age: 30,
+        hobby: '削除'
+      });
+  
+      const res = await request(app).delete(`/users/${newUser.id}`);
+  
+      expect(res.statusCode).toBe(204);
+  
+      const check = await User.findByPk(newUser.id);
+      expect(check).toBeNull();
+    });
+  
+    it('存在しないIDを指定すると404エラー', async () => {
+      const res = await request(app).delete('/users/99999');
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe('指定されたユーザーが存在しません');
+    });
+  });
 });
