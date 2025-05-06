@@ -19,14 +19,19 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: my_test_db
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     env:
+      NODE_ENV: test
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_NAME: my_test_db
-      DB_HOST: localhost
+      DB_HOST: 127.0.0.1
       DB_PORT: 5432
-      NODE_ENV: test
 
     steps:
       - name: Checkout
@@ -36,6 +41,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h 127.0.0.1 -p 5432; do
+            echo "⏳ Waiting for postgres..."
+            sleep 1
+          done
+          echo "✅ Postgres is ready!"
 
       - name: Install dependencies
         run: npm install
@@ -47,7 +60,6 @@ jobs:
     needs: backend-ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -76,14 +88,3 @@ jobs:
 
       - name: Trigger Render Deploy Hook
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-
-
-# deploy-staging:
-#   needs: build-test-e2e
-#   if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-#   runs-on: ubuntu-latest
-#   steps:
-#     - name: Renderにステージングデプロイ
-#       run: |
-#         curl -X POST ${{ secrets.RENDER_STG_DEPLOY_HOOK_URL }}
-
