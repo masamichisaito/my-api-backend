@@ -6,7 +6,7 @@
     "start": "node app.js",
     "dev": "nodemon server.js",
     "test": "jest",
-    "render-start": "npx sequelize-cli db:migrate --env production && node index.js"
+      "render-start": "npx sequelize-cli db:migrate --env production && node app.js"
   },
   "keywords": [],
   "author": "",
