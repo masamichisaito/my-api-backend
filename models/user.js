@@ -66,6 +66,10 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'hobby は100文字以内で入力してください'
         }
       }
+    },
+    isTestData: { // ← ここに正しく配置！
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     }
   }, {
     sequelize,

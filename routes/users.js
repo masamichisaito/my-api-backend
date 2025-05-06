@@ -13,11 +13,11 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { email, name, age, hobby } = req.body;
+  const { email, name, age, hobby, isTestData } = req.body; 
   console.log('[📩 POST受信]', req.body); // ← 追加！
 
   try {
-    const user = await User.create({ email, name, age, hobby });
+    const user = await User.create({ email, name, age, hobby, isTestData });
     console.log('[✅ 登録成功]', user); // ← 追加！
     res.status(201).json(user);
   } catch (err) {
@@ -48,6 +48,24 @@ router.post('/', async (req, res) => {
     
     return res.status(500).json({ error: 'Internal Server Error' });
     
+  }
+});
+
+// DELETE /users/:id
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const deletedCount = await User.destroy({ where: { id } });
+
+    if (deletedCount === 0) {
+      return res.status(404).json({ error: '指定されたユーザーが存在しません' });
+    }
+
+    res.status(204).send(); // 成功でも返すデータがなければ204
+  } catch (err) {
+    console.error('[❌ 削除エラー]', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
