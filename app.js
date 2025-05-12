@@ -1,29 +1,29 @@
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
 
-// JSONリクエストのパース
+// JSONパース
 app.use(express.json());
 
-// CORS設定（必要に応じて調整）
+// CORS設定（必要に応じて環境変数から許可リストに切り替えも可能）
 const corsOptions = {
   origin: [
-    'http://localhost:5173', // ローカル開発用
-    'https://your-frontend.onrender.com' // 本番フロントエンドのURL
+    'http://localhost:5173',
+    'https://my-ui-frontend.onrender.com'
   ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 };
 app.use(cors(corsOptions));
 
-// ルート定義（ルーターを分離する構成が望ましい）
+// テスト用ルート（E2Eなどでリセット用に使う場合）
+const testRoutes = require('./routes/testRoutes');
+app.use('/test', testRoutes);
+
+// メインのユーザールート
 const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
 
-// テスト用ルート（E2E用など）
-if (process.env.NODE_ENV === 'test') {
-  const testRoutes = require('./routes/testRoutes');
-  app.use('/test', testRoutes);
-}
+// 必要に応じてエラーハンドリングや404なども追加可能
 
 module.exports = app;
