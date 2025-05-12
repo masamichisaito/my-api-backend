@@ -1,27 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
 
-// JSONボディのパース
+const app = express();
 app.use(express.json());
 
-// CORSの設定
 const corsOptions = {
   origin: [
     'http://localhost:5173',
-    'https://my-ui-frontend.onrender.com'
+    'https://your-frontend-url.onrender.com',
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: true,
 };
-app.use(cors(corsOptions)); // ← これ1回でOK
+app.use(cors(corsOptions));
 
-// テスト用ルートの登録
-const testRoutes = require('./routes/testRoutes');
-app.use('/test', testRoutes);
-
-// 本番用ルートの登録（必要に応じて追加）
 const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
+
+// テスト用ルート（CI用）
+if (process.env.NODE_ENV === 'test') {
+  const testRoutes = require('./routes/testRoutes');
+  app.use('/test', testRoutes);
+}
 
 module.exports = app;
